@@ -1,2 +1,2 @@
 # Earth quakes practice
-Authors: Vanya
+Authors: Vanya, Sergei
