@@ -3,6 +3,8 @@ from sqlalchemy.orm import Session
 
 import crud, models, schemas
 from database import SessionLocal, engine
+import uvicorn
+
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -52,4 +54,7 @@ def read_items(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     items = crud.get_items(db, skip=skip, limit=limit)
     return items
 
-
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+    # uvicorn.run("main:app", host="0.0.0.0", port=8000)
+    # http://127.0.0.1:8000/docs
