@@ -1,7 +1,7 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DATETIME
 from sqlalchemy.orm import relationship
 
-from .database import Base
+from database import Base
 
 
 class User(Base):
@@ -9,18 +9,19 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String, unique=True, index=True)
+    user_name = Column(String, unique=True)
     hashed_password = Column(String)
-    is_active = Column(Boolean, default=True)
-
-    items = relationship("Item", back_populates="owner")
+    files = relationship("File", back_populates="owner")
 
 
-class Item(Base):
-    __tablename__ = "items"
+class File(Base):
+    __tablename__ = "files"
 
     id = Column(Integer, primary_key=True, index=True)
-    title = Column(String, index=True)
-    description = Column(String, index=True)
-    owner_id = Column(Integer, ForeignKey("users.id"))
+    path_to_file = Column(String, unique=True)
+    data_start_date = Column(DATETIME)
+    data_end_date = Column(DATETIME)
+    upload_date = Column(DATETIME)
+    user_id = Column(Integer, ForeignKey("users.id"))
 
-    owner = relationship("User", back_populates="items")
+    user = relationship("User", back_populates="items")
