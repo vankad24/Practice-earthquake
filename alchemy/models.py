@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DATETIME
+from sqlalchemy import Column, ForeignKey, Integer, String, DATETIME
 from sqlalchemy.orm import relationship
 
 from database import Base
@@ -11,7 +11,8 @@ class User(Base):
     email = Column(String, unique=True, index=True)
     user_name = Column(String, unique=True)
     hashed_password = Column(String)
-    files = relationship("File", back_populates="owner")
+
+    files = relationship("File", back_populates="user")
 
 
 class File(Base):
@@ -24,4 +25,4 @@ class File(Base):
     upload_date = Column(DATETIME)
     user_id = Column(Integer, ForeignKey("users.id"))
 
-    user = relationship("User", back_populates="items")
+    user = relationship("User", back_populates="files")
