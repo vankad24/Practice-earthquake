@@ -19,10 +19,10 @@ class Item(Base):
     __tablename__ = "items"
 
     id = Column(Integer, primary_key=True, index=True)
-    path_to_file = Column(String, unique=True)
+    file_name = Column(String, unique=True)
     data_start_date = Column(DATETIME)
     data_end_date = Column(DATETIME)
     upload_date = Column(DATETIME)
-    user_id = Column(Integer, ForeignKey("users.id"))
+    author_id = Column(Integer, ForeignKey("users.id"))
 
     user = relationship("User", back_populates="items")
