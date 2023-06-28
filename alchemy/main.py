@@ -1,4 +1,5 @@
 from fastapi import Depends, FastAPI, HTTPException, UploadFile
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 import crud, models, schemas
@@ -65,6 +66,10 @@ async def create_upload_file(file: UploadFile):
     finally:
         await file.close()
     return {"message": f"The file '{file.filename}' was uploaded"}
+
+@app.get("/getfile/", response_class=FileResponse)
+async def get_file(path: str):
+    return "files/"+path
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
