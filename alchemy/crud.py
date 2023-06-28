@@ -34,3 +34,15 @@ def create_user_item(db: Session, item: schemas.ItemCreate, user_id: int):
     db.commit()
     db.refresh(db_item)
     return db_item
+
+
+def save_user_file(user_id, file, data_start_date, data_end_date):
+    return None
+
+
+def user_exist(user_id):
+    return True
+
+
+def file_exist(user_id, filename):
+    return False

@@ -1,8 +1,9 @@
-from fastapi import Depends, FastAPI, HTTPException, UploadFile
+from fastapi import Depends, FastAPI, HTTPException, UploadFile, status
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 import crud, models, schemas
+from alchemy.storage import FileStorage
 from database import SessionLocal, engine
 import uvicorn
 
@@ -11,6 +12,7 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
+storage: FileStorage = FileStorage()
 
 # Dependency
 def get_db():
@@ -26,7 +28,9 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db_user = crud.get_user_by_email(db, email=user.email)
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
-    return crud.create_user(db=db, user=user)
+    created_user = crud.create_user(db=db, user=user)
+    storage.create_user_folder(created_user.id)
+    return created_user
 
 
 @app.get("/users/", response_model=list[schemas.User])
@@ -55,16 +59,23 @@ def read_items(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     items = crud.get_items(db, skip=skip, limit=limit)
     return items
 
-@app.post("/uploadfile/")
-async def create_upload_file(file: UploadFile):
+@app.post("/users/{user_id}/uploadfile/")
+async def create_upload_file(user_id: int, data_start_date:int, data_end_date:int, file: UploadFile):
+
+    if not crud.user_exist(user_id):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail=f"User with id '{user_id}' not found")
+    if crud.file_exist(user_id, file.filename):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail=f"File '{file.filename}' already uploaded")
+
+    crud.save_user_file(user_id, file, data_start_date, data_end_date)
     try:
-        contents = await file.read()
-        with open("files/"+file.filename, 'wb') as f:
-            f.write(contents)
+        await storage.save_user_file(user_id, file)
     except Exception as e:
-        return {"message": f"There was an error uploading the file {e.args}"}
-    finally:
-        await file.close()
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                            detail=f"There was an error uploading the file")
+
     return {"message": f"The file '{file.filename}' was uploaded"}
 
 @app.get("/getfile/", response_class=FileResponse)
