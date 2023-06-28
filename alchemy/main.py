@@ -5,7 +5,6 @@ import crud, models, schemas
 from database import SessionLocal, engine
 import uvicorn
 
-
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
@@ -42,29 +41,31 @@ def read_user(user_id: int, db: Session = Depends(get_db)):
     return db_user
 
 
-@app.post("/users/{user_id}/items/", response_model=schemas.Item)
-def create_item_for_user(
-    user_id: int, item: schemas.ItemCreate, db: Session = Depends(get_db)
+@app.post("/users/{user_id}/files/", response_model=schemas.File)
+def create_file_for_user(
+        user_id: int, file: schemas.FileCreate, db: Session = Depends(get_db)
 ):
-    return crud.create_user_item(db=db, item=item, user_id=user_id)
+    return crud.create_user_file(db=db, file=file, user_id=user_id)
 
 
-@app.get("/items/", response_model=list[schemas.Item])
-def read_items(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    items = crud.get_items(db, skip=skip, limit=limit)
-    return items
+@app.get("/files/", response_model=list[schemas.File])
+def read_files(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    files = crud.get_files(db, skip=skip, limit=limit)
+    return files
+
 
 @app.post("/uploadfile/")
 async def create_upload_file(file: UploadFile):
     try:
         contents = await file.read()
-        with open("files/"+file.filename, 'wb') as f:
+        with open("files/" + file.filename, 'wb') as f:
             f.write(contents)
     except Exception as e:
         return {"message": f"There was an error uploading the file {e.args}"}
     finally:
         await file.close()
     return {"message": f"The file '{file.filename}' was uploaded"}
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

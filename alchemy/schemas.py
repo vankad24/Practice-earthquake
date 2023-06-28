@@ -1,15 +1,15 @@
 from pydantic import BaseModel, EmailStr
 
 
-class ItemBase(BaseModel):
+class FileBase(BaseModel):
     file_name: str
 
 
-class ItemCreate(ItemBase):
+class FileCreate(FileBase):
     pass
 
 
-class Item(ItemBase):
+class File(FileBase):
     id: int
 
     class Config:
@@ -26,7 +26,7 @@ class UserCreate(UserBase):
 
 class User(UserBase):
     id: int
-    items: list[Item] = []
+    files: list[File] = []
 
     class Config:
         orm_mode = True

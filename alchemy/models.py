@@ -12,11 +12,11 @@ class User(Base):
     user_name = Column(String, unique=True)
     hashed_password = Column(String)
 
-    items = relationship("Item", back_populates="user")
+    files = relationship("File", back_populates="user")
 
 
-class Item(Base):
-    __tablename__ = "items"
+class File(Base):
+    __tablename__ = "files"
 
     id = Column(Integer, primary_key=True, index=True)
     file_name = Column(String, unique=True)
@@ -25,4 +25,4 @@ class Item(Base):
     upload_date = Column(DATETIME)
     author_id = Column(Integer, ForeignKey("users.id"))
 
-    user = relationship("User", back_populates="items")
+    user = relationship("User", back_populates="files")
