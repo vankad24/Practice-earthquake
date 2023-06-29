@@ -8,12 +8,12 @@ from src.storage import FileStorage
 from src.database import SessionLocal, engine
 import uvicorn
 
-
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
 storage: FileStorage = FileStorage()
+
 
 # Dependency
 def get_db():
@@ -47,6 +47,7 @@ def get_user_by_id(user_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="User not found")
     return db_user
 
+
 @app.post("/user/get", response_model=schemas.User)
 async def get_user_by_email(email: EmailStr, db: Session = Depends(get_db)):
     db_user = crud.get_user_by_email(db, email=email)
@@ -54,9 +55,9 @@ async def get_user_by_email(email: EmailStr, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="User not found")
     return db_user
 
-@app.post("/user/{user_id}/file/upload")
-async def upload_file(user_id: int, data_start_date:int, data_end_date:int, file: UploadFile):
 
+@app.post("/user/{user_id}/file/upload")
+async def upload_file(user_id: int, data_start_date: int, data_end_date: int, file: UploadFile):
     if not crud.user_exist(user_id):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail=f"User with id '{user_id}' not found")
@@ -73,26 +74,25 @@ async def upload_file(user_id: int, data_start_date:int, data_end_date:int, file
 
     return {"message": f"The file '{file.filename}' was uploaded"}
 
+
 # @app.get("/user/{user_id}/file/download", response_class=FileResponse)
 # async def download_file(user_id: int, file_name: str):
 #     return "files/"+path
 
-#todo сделать путь "/user/{user_id}/files"
-@app.post("/users/{user_name}/files", response_model=list[schemas.File])
-async def get_user_files_list(user_name, from_date, to_date, limit, db: Session = Depends(get_db)):
+
+@app.post("/users/{user_id}/files", response_model=list[schemas.File])
+async def get_user_files_list(user_id, from_date, to_date, limit, db: Session = Depends(get_db)):
     """ from_date and to_date accepts only the following format: yyyy-mm-dd hh:mm:ss (ex. 2020-12-01 12:39:48) """
-    try:
-        user_id = crud.get_id_by_user_name(db, user_name)
-    except crud.UserNotExist: #todo удалить это исключение
+    user = crud.get_user_by_id(db, user_id)
+    if user is None:
         raise HTTPException(status_code=404, detail="User doesn't exist")
     return crud.get_user_files_list(db, user_id, from_date, to_date, limit)
+
 
 # @app.get("/files/", response_model=list[schemas.File])
 # def read_files(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
 #     files = crud.get_files(db, skip=skip, limit=limit)
 #     return files
-
-
 
 
 if __name__ == "__main__":
