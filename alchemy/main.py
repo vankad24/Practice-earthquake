@@ -5,6 +5,7 @@ import crud, models, schemas
 from database import SessionLocal, engine
 import uvicorn
 
+
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
@@ -67,7 +68,16 @@ async def create_upload_file(file: UploadFile):
     return {"message": f"The file '{file.filename}' was uploaded"}
 
 
+@app.post("/users/{user_id}/files", response_model=list[schemas.File])
+async def get_user_files_list(user_id, from_date, to_date, limit, db: Session = Depends(get_db)):
+    user = crud.get_user(db, user_id)
+    if not user:
+        raise HTTPException(status_code=200, detail="User already exists")
+    return crud.get_user_files_list(db, user_id, from_date, to_date, limit)
+
+
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run("alchemy.main:app", host="0.0.0.0", port=8000)  #, reload=True)
+    # print(a)
     # uvicorn.run("main:app", host="0.0.0.0", port=8000)
     # http://127.0.0.1:8000/docs
