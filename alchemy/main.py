@@ -85,14 +85,15 @@ async def get_file(path: str):
     return "files/"+path
 
 
-@app.post("/user-id/")
-async def get_id_by_user_name(user_name: str, db: Session = Depends(get_db)):
-    try:
-        user_id = crud.get_id_by_user_name(db, user_name)
-    except crud.UserNotExist:
-        raise HTTPException(status_code=404, detail="User doesn't exist")
-    return {user_name: user_id}
-
+@app.post("/users/info", response_model=schemas.User)
+async def get_user_by_email(email: str, db: Session = Depends(get_db)):
+    pass
+    # try:
+    #     user_id = crud.get_user_by_email(db, user_name)
+    # except crud.UserNotExist:
+    #     raise HTTPException(status_code=404, detail="User doesn't exist")
+    # return {"user_id": user_id, "user_name": user_name}
+    # todo
 
 @app.post("/users/{user_name}/files", response_model=list[schemas.File])
 async def get_user_files_list(user_name, from_date, to_date, limit, db: Session = Depends(get_db)):
@@ -106,6 +107,5 @@ async def get_user_files_list(user_name, from_date, to_date, limit, db: Session 
 
 if __name__ == "__main__":
     uvicorn.run("alchemy.main:app", host="0.0.0.0", port=8000)  # , reload=True)
-    # print(a)
     # uvicorn.run("main:app", host="0.0.0.0", port=8000)
     # http://127.0.0.1:8000/docs
