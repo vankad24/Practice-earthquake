@@ -87,6 +87,7 @@ async def get_file(path: str):
 
 @app.post("/users/{user_id}/files", response_model=list[schemas.File])
 async def get_user_files_list(user_id, from_date, to_date, limit, db: Session = Depends(get_db)):
+    """ from_date and to_date accepts only the following format: yyyy-mm-dd hh:mm:ss (ex. 2020-12-01 12:39:48) """
     user = crud.get_user(db, user_id)
     if not user:
         raise HTTPException(status_code=200, detail="User already exists")
