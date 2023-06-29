@@ -2,9 +2,9 @@ from fastapi import Depends, FastAPI, HTTPException, UploadFile, status
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
-import crud, models, schemas
-from alchemy.storage import FileStorage
-from database import SessionLocal, engine
+from src import crud, models, schemas
+from src.storage import FileStorage
+from src.database import SessionLocal, engine
 import uvicorn
 
 
@@ -106,6 +106,6 @@ async def get_user_files_list(user_name, from_date, to_date, limit, db: Session 
 
 
 if __name__ == "__main__":
-    uvicorn.run("alchemy.main:app", host="0.0.0.0", port=8000)  # , reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8000)  # , reload=True)
     # uvicorn.run("main:app", host="0.0.0.0", port=8000)
     # http://127.0.0.1:8000/docs

@@ -1,5 +1,5 @@
 import pytest
-from alchemy.models import User, File
+from src.models import User, File
 
 
 class TestUser:
