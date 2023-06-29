@@ -54,13 +54,6 @@ async def get_user_by_email(email: EmailStr, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="User not found")
     return db_user
 
-@app.post("/user/{user_id}/files", response_model=schemas.File)
-def create_file_for_user(
-        user_id: int, file: schemas.FileCreate, db: Session = Depends(get_db)
-):
-    return crud.create_user_file(db=db, file=file, user_id=user_id)
-
-
 @app.post("/user/{user_id}/file/upload")
 async def upload_file(user_id: int, data_start_date:int, data_end_date:int, file: UploadFile):
 
