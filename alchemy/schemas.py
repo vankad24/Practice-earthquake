@@ -1,16 +1,21 @@
 from pydantic import BaseModel, EmailStr
+from datetime import datetime
 
 
-class ItemBase(BaseModel):
+class FileBase(BaseModel):
     file_name: str
 
 
-class ItemCreate(ItemBase):
+class FileCreate(FileBase):
     pass
 
 
-class Item(ItemBase):
+class File(FileBase):
     id: int
+    data_start_date: datetime
+    data_end_date: datetime
+    upload_date: datetime
+    author_id: int
 
     class Config:
         orm_mode = True
@@ -26,7 +31,7 @@ class UserCreate(UserBase):
 
 class User(UserBase):
     id: int
-    items: list[Item] = []
+    files: list[File] = []
 
     class Config:
         orm_mode = True

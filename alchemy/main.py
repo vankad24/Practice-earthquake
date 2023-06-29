@@ -47,17 +47,18 @@ def read_user(user_id: int, db: Session = Depends(get_db)):
     return db_user
 
 
-@app.post("/users/{user_id}/items/", response_model=schemas.Item)
-def create_item_for_user(
-    user_id: int, item: schemas.ItemCreate, db: Session = Depends(get_db)
+@app.post("/users/{user_id}/files/", response_model=schemas.File)
+def create_file_for_user(
+        user_id: int, file: schemas.FileCreate, db: Session = Depends(get_db)
 ):
-    return crud.create_user_item(db=db, item=item, user_id=user_id)
+    return crud.create_user_file(db=db, file=file, user_id=user_id)
 
 
-@app.get("/items/", response_model=list[schemas.Item])
-def read_items(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    items = crud.get_items(db, skip=skip, limit=limit)
-    return items
+@app.get("/files/", response_model=list[schemas.File])
+def read_files(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    files = crud.get_files(db, skip=skip, limit=limit)
+    return files
+
 
 @app.post("/users/{user_id}/uploadfile/")
 async def create_upload_file(user_id: int, data_start_date:int, data_end_date:int, file: UploadFile):
@@ -78,11 +79,23 @@ async def create_upload_file(user_id: int, data_start_date:int, data_end_date:in
 
     return {"message": f"The file '{file.filename}' was uploaded"}
 
+
 @app.get("/getfile/", response_class=FileResponse)
 async def get_file(path: str):
     return "files/"+path
 
+
+@app.post("/users/{user_id}/files", response_model=list[schemas.File])
+async def get_user_files_list(user_id, from_date, to_date, limit, db: Session = Depends(get_db)):
+    user = crud.get_user(db, user_id)
+    if not user:
+        raise HTTPException(status_code=200, detail="User already exists")
+    return crud.get_user_files_list(db, user_id, from_date, to_date, limit)
+
+
+
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run("alchemy.main:app", host="0.0.0.0", port=8000)  #, reload=True)
+    # print(a)
     # uvicorn.run("main:app", host="0.0.0.0", port=8000)
     # http://127.0.0.1:8000/docs
