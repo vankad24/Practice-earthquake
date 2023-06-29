@@ -3,6 +3,17 @@ from sqlalchemy.orm import Session
 import models, schemas
 
 
+class UserNotExist(Exception):
+    pass
+
+
+def get_id_by_user_name(db: Session, user_name: str):
+    user_id = db.query(models.User.id).filter(models.User.user_name == user_name).all()
+    if not user_id:
+        raise UserNotExist("User doesn't exist")
+    return user_id[0][0]
+
+
 def get_user(db: Session, user_id: int):
     return db.query(models.User).filter(models.User.id == user_id).first()
 
