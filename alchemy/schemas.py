@@ -1,4 +1,5 @@
 from pydantic import BaseModel, EmailStr
+from datetime import datetime
 
 
 class FileBase(BaseModel):
@@ -11,6 +12,10 @@ class FileCreate(FileBase):
 
 class File(FileBase):
     id: int
+    data_start_date: datetime
+    data_end_date: datetime
+    upload_date: datetime
+    author_id: int
 
     class Config:
         orm_mode = True
