@@ -55,7 +55,7 @@ class FileStorage:
                 deleted_tokens.append(file)
         return deleted_tokens
 
-    async def save_user_file(self, user_id, file: UploadFile):
+    async def save_uploaded_file(self, user_id, file: UploadFile):
         contents = await file.read()
         with open(self.STORAGE_PATH / str(user_id) / file.filename, 'wb') as f:
             f.write(contents)

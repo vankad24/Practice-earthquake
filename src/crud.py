@@ -50,3 +50,6 @@ def user_exist(user_id):
 def file_exist(user_id, filename):
     return False
 
+
+def get_file(user_id, file_name):
+    return None

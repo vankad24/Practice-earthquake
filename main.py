@@ -67,7 +67,7 @@ async def upload_file(user_id: int, data_start_date: int, data_end_date: int, fi
 
     crud.save_user_file(user_id, file, data_start_date, data_end_date)
     try:
-        await storage.save_user_file(user_id, file)
+        await storage.save_uploaded_file(user_id, file)
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                             detail=f"There was an error uploading the file")
@@ -80,19 +80,27 @@ async def upload_file(user_id: int, data_start_date: int, data_end_date: int, fi
 #     return "files/"+path
 
 
-@app.post("/users/{user_id}/files", response_model=list[schemas.File])
-async def get_user_files_list(user_id, from_date, to_date, limit, db: Session = Depends(get_db)):
+@app.post("/user/{user_id}/files", response_model=list[schemas.File])
+async def get_user_files_list(user_id: int, from_date, to_date, limit, db: Session = Depends(get_db)):
     """ from_date and to_date accepts only the following format: yyyy-mm-dd hh:mm:ss (ex. 2020-12-01 12:39:48) """
     user = crud.get_user_by_id(db, user_id)
     if user is None:
-        raise HTTPException(status_code=404, detail="User doesn't exist")
+        raise HTTPException(status_code=400, detail="User doesn't exist")
     return crud.get_user_files_list(db, user_id, from_date, to_date, limit)
 
+@app.get("/user/{user_id}/generate", response_class=FileResponse)
+def generate_images_from_file(user_id: int, file_name: str):
+    db_file = crud.get_file(user_id, file_name)
+    if db_file is None:
+        raise HTTPException(status_code=400, detail="File not found")
 
-# @app.get("/files/", response_model=list[schemas.File])
-# def read_files(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-#     files = crud.get_files(db, skip=skip, limit=limit)
-#     return files
+    if not db_file.image_generated:
+        pass
+        # generate_images()
+        # storage.save_images()
+
+    return "path/to/images"
+
 
 
 if __name__ == "__main__":
