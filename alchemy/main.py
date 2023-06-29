@@ -85,18 +85,27 @@ async def get_file(path: str):
     return "files/"+path
 
 
-@app.post("/users/{user_id}/files", response_model=list[schemas.File])
-async def get_user_files_list(user_id, from_date, to_date, limit, db: Session = Depends(get_db)):
+@app.post("/user-id/")
+async def get_id_by_user_name(user_name: str, db: Session = Depends(get_db)):
+    try:
+        user_id = crud.get_id_by_user_name(db, user_name)
+    except crud.UserNotExist:
+        raise HTTPException(status_code=404, detail="User doesn't exist")
+    return {user_name: user_id}
+
+
+@app.post("/users/{user_name}/files", response_model=list[schemas.File])
+async def get_user_files_list(user_name, from_date, to_date, limit, db: Session = Depends(get_db)):
     """ from_date and to_date accepts only the following format: yyyy-mm-dd hh:mm:ss (ex. 2020-12-01 12:39:48) """
-    user = crud.get_user(db, user_id)
-    if not user:
-        raise HTTPException(status_code=200, detail="User already exists")
+    try:
+        user_id = crud.get_id_by_user_name(db, user_name)
+    except crud.UserNotExist:
+        raise HTTPException(status_code=404, detail="User doesn't exist")
     return crud.get_user_files_list(db, user_id, from_date, to_date, limit)
 
 
-
 if __name__ == "__main__":
-    uvicorn.run("alchemy.main:app", host="0.0.0.0", port=8000)  #, reload=True)
+    uvicorn.run("alchemy.main:app", host="0.0.0.0", port=8000)  # , reload=True)
     # print(a)
     # uvicorn.run("main:app", host="0.0.0.0", port=8000)
     # http://127.0.0.1:8000/docs
