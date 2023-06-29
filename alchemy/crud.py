@@ -24,8 +24,11 @@ def create_user(db: Session, user: schemas.UserCreate):
     return db_user
 
 
-def get_files(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(models.File).offset(skip).limit(limit).all()
+def get_user_files_list(db: Session, user_id: int, from_date: str, to_date: str, limit: int = 100):
+    return db.query(models.File).filter(models.File.author_id == user_id)\
+                                .filter(models.File.upload_date.between(from_date, to_date))\
+                                .order_by(models.File.upload_date.desc())\
+                                .limit(limit).all()
 
 
 def create_user_file(db: Session, file: schemas.FileCreate, user_id: int):
