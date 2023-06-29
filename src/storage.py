@@ -19,7 +19,7 @@ class ProcessingDirLengthError(Exception):
 class FileStorage:
     __instance = None
 
-    STORAGE_PATH = Path("./static/uploads")
+    STORAGE_PATH = Path("./static/files")
     CLEAN_AFTER_SECONDS = 60 * 60 * 24 * 10
 
     def __new__(cls):
