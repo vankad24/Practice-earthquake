@@ -49,11 +49,23 @@ def get_user_by_id(user_id: int, db: Session = Depends(get_db)):
 
 
 @app.post("/user/get", response_model=schemas.User)
-async def get_user_by_email(email: EmailStr, db: Session = Depends(get_db)):
-    db_user = crud.get_user_by_email(db, email=email)
+async def get_user_by_email(user: schemas.UserBase, db: Session = Depends(get_db)):
+    """
+        Я заменил email на user (UserBase) и тест заработал
+        https://stackoverflow.com/questions/59929028/python-fastapi-error-422-with-post-request-when-sending-json-data
+    """
+    db_user = crud.get_user_by_email(db, email=user.email)
     if db_user is None:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User not found")
     return db_user
+
+
+# @app.post("/user/get", response_model=schemas.User)
+# async def get_user_by_email(email: EmailStr, db: Session = Depends(get_db)):
+#     db_user = crud.get_user_by_email(db, email=email)
+#     if db_user is None:
+#         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User not found")
+#     return db_user
 
 
 @app.post("/user/{user_id}/file/upload")
