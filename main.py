@@ -59,10 +59,12 @@ async def get_user_by_email(email: EmailStr, db: Session = Depends(get_db)):
 @app.post("/user/{user_id}/file/upload")
 async def upload_file(user_id: int, data_start_date: str, data_end_date: str, file: UploadFile,
                       db: Session = Depends(get_db)):
-    if not crud.user_exist(db, user_id):
+    db_user = crud.get_user_by_id(db, user_id)
+    if db_user is None:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail=f"User with id '{user_id}' not found")
-    if crud.file_exist(db, user_id, file.filename):
+    db_file = crud.get_file(db, user_id, file.filename)
+    if db_file is not None:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail=f"File '{file.filename}' already uploaded")
 

@@ -56,22 +56,6 @@ def save_user_file(db: Session, user_id, file: UploadFile, data_start_date, data
     return file1
 
 
-def user_exist(db, user_id):
-    user = db.query(models.User).filter(models.User.id == user_id).first()
-    if user:
-        return True
-    return False
-
-
-def file_exist(db, user_id, file_name):
-    file1 = db.query(models.File).filter(models.File.author_id == user_id)\
-                                 .filter(models.File.file_name == file_name)\
-                                 .all()
-    if file1:
-        return True
-    return False
-
-
 def get_file(db, user_id, file_name):
     file1 = db.query(models.File).filter(models.File.author_id == user_id)\
                                  .filter(models.File.file_name == file_name)\
