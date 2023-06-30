@@ -57,15 +57,16 @@ async def get_user_by_email(email: EmailStr, db: Session = Depends(get_db)):
 
 
 @app.post("/user/{user_id}/file/upload")
-async def upload_file(user_id: int, data_start_date: int, data_end_date: int, file: UploadFile):
-    if not crud.user_exist(user_id):
+async def upload_file(user_id: int, data_start_date: str, data_end_date: str, file: UploadFile,
+                      db: Session = Depends(get_db)):
+    if not crud.user_exist(db, user_id):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail=f"User with id '{user_id}' not found")
-    if crud.file_exist(user_id, file.filename):
+    if crud.file_exist(db, user_id, file.filename):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail=f"File '{file.filename}' already uploaded")
 
-    crud.save_user_file(user_id, file, data_start_date, data_end_date)
+    crud.save_user_file(db, user_id, file, data_start_date, data_end_date)
     try:
         await storage.save_uploaded_file(user_id, file)
     except Exception as e:
@@ -88,9 +89,10 @@ async def get_user_files_list(user_id: int, from_date, to_date, limit, db: Sessi
         raise HTTPException(status_code=400, detail="User doesn't exist")
     return crud.get_user_files_list(db, user_id, from_date, to_date, limit)
 
+
 @app.get("/user/{user_id}/generate", response_class=FileResponse)
-def generate_images_from_file(user_id: int, file_name: str):
-    db_file = crud.get_file(user_id, file_name)
+def generate_images_from_file(user_id: int, file_name: str, db: Session = Depends(get_db)):
+    db_file = crud.get_file(db, user_id, file_name)
     if db_file is None:
         raise HTTPException(status_code=400, detail="File not found")
 
@@ -100,7 +102,6 @@ def generate_images_from_file(user_id: int, file_name: str):
         # storage.save_images()
 
     return "path/to/images"
-
 
 
 if __name__ == "__main__":
