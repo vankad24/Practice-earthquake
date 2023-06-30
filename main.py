@@ -64,7 +64,7 @@ async def upload_file(user_id: int, data_start_date: str, data_end_date: str, fi
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail=f"User with id '{user_id}' not found")
     db_file = crud.get_file(db, user_id, file.filename)
-    if db_file is None:
+    if db_file is not None:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail=f"File '{file.filename}' already uploaded")
 
