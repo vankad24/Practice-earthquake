@@ -28,7 +28,7 @@ def get_db():
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db_user = crud.get_user_by_email(db, email=user.email)
     if db_user:
-        raise HTTPException(status_code=400, detail="Email already registered")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
     created_user = crud.create_user(db=db, user=user)
     storage.create_user_folder(created_user.id)
     return created_user
@@ -44,7 +44,7 @@ def get_users_list(skip: int = 0, limit: int = 100, db: Session = Depends(get_db
 def get_user_by_id(user_id: int, db: Session = Depends(get_db)):
     db_user = crud.get_user_by_id(db, user_id=user_id)
     if db_user is None:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User not found")
     return db_user
 
 
@@ -52,7 +52,7 @@ def get_user_by_id(user_id: int, db: Session = Depends(get_db)):
 async def get_user_by_email(email: EmailStr, db: Session = Depends(get_db)):
     db_user = crud.get_user_by_email(db, email=email)
     if db_user is None:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User not found")
     return db_user
 
 
@@ -86,7 +86,7 @@ async def get_user_files_list(user_id: int, from_date, to_date, limit, db: Sessi
     """ from_date and to_date accepts only the following format: yyyy-mm-dd hh:mm:ss (ex. 2020-12-01 12:39:48) """
     user = crud.get_user_by_id(db, user_id)
     if user is None:
-        raise HTTPException(status_code=400, detail="User doesn't exist")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User doesn't exist")
     return crud.get_user_files_list(db, user_id, from_date, to_date, limit)
 
 
@@ -94,7 +94,7 @@ async def get_user_files_list(user_id: int, from_date, to_date, limit, db: Sessi
 def generate_images_from_file(user_id: int, file_name: str, db: Session = Depends(get_db)):
     db_file = crud.get_file(db, user_id, file_name)
     if db_file is None:
-        raise HTTPException(status_code=400, detail="File not found")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="File not found")
 
     if not db_file.image_generated:
         pass
