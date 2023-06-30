@@ -61,3 +61,6 @@ class FileStorage:
             f.write(contents)
         await file.close()
 
+    def delete_user_folder(self, user_id):
+        pth = self.STORAGE_PATH / str(user_id)
+        shutil.rmtree(pth)
