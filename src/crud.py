@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
-
+from fastapi import UploadFile
 from . import models, schemas
+from datetime import datetime
 
 
 def get_user_by_id(db: Session, user_id: int):
@@ -39,17 +40,40 @@ def create_user_file(db: Session, file: schemas.FileCreate, user_id: int):
     return file
 
 
-def save_user_file(user_id, file, data_start_date, data_end_date):
-    return None
+def save_user_file(db: Session, user_id, file: UploadFile, data_start_date, data_end_date):
+
+    file1 = models.File()
+    file1.author_id = user_id
+    file1.file_name = file.filename
+    file1.data_start_date = datetime.strptime(data_start_date, "%Y-%m-%d %H:%M:%S")
+    file1.data_end_date = datetime.strptime(data_end_date, "%Y-%m-%d %H:%M:%S")
+    file1.upload_date = datetime.now().replace(microsecond=0)
+
+    db.add(file1)
+    db.commit()
+    db.refresh(file1)
+
+    return file1
 
 
-def user_exist(user_id):
-    return True
-
-
-def file_exist(user_id, filename):
+def user_exist(db, user_id):
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if user:
+        return True
     return False
 
 
-def get_file(user_id, file_name):
-    return None
+def file_exist(db, user_id, file_name):
+    file1 = db.query(models.File).filter(models.File.author_id == user_id)\
+                                 .filter(models.File.file_name == file_name)\
+                                 .all()
+    if file1:
+        return True
+    return False
+
+
+def get_file(db, user_id, file_name):
+    file1 = db.query(models.File).filter(models.File.author_id == user_id)\
+                                 .filter(models.File.file_name == file_name)\
+                                 .first()
+    return file1
