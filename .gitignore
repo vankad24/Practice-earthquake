@@ -181,5 +181,5 @@ pyrightconfig.json
 *.lock
 app
 *.db
-
+static
 .idea/
