@@ -1,6 +1,5 @@
 import os
-
-import pytest
+import shutil
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -49,18 +48,25 @@ def setup_module():
 def teardown_module():
     print("teardown")
     # os.remove(my_context["file_name"])
-    file = "test_file.txt"
-    file1 = "test_file_1.txt"
     curr_dir = os.path.abspath(os.getcwd())
     print(curr_dir)
-    #todo fix
-    if os.path.exists(curr_dir + file):
-        os.remove(file)
-    if os.path.exists(curr_dir + file1):
-        os.remove(file1)
+
+    test_file = curr_dir + "\\test_file.txt"
+    test_file_1 = curr_dir + "\\test_file_1.txt"
+    # static_folder = curr_dir + "\\static"
+
+    if os.path.exists(test_file):
+        os.remove(test_file)
+
+    if os.path.exists(test_file_1):
+        os.remove(test_file_1)
+
     fs = FileStorage()
     if (fs.STORAGE_PATH / str(1)).exists():
         fs.delete_user_folder(1)
+
+    # if os.path.exists(static_folder):
+    #     shutil.rmtree(static_folder)
     # fs.delete_user_folder(my_context["user_id"])
 
 
@@ -237,6 +243,7 @@ def test_upload_file_server_error():
     assert response.status_code == 500, response.text
     data = response.json()
     assert data["detail"] == f"There was an error uploading the file"
+
 
 def test_get_db():
     gen = get_db()
