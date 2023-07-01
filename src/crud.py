@@ -32,14 +32,6 @@ def get_user_files_list(db: Session, user_id: int, from_date: str, to_date: str,
                                 .limit(limit).all()
 
 
-def create_user_file(db: Session, file: schemas.FileCreate, user_id: int):
-    file = models.File(**file.dict(), author_id=user_id)
-    db.add(file)
-    db.commit()
-    db.refresh(file)
-    return file
-
-
 def save_user_file(db: Session, user_id, file: UploadFile, data_start_date, data_end_date):
 
     file1 = models.File()
