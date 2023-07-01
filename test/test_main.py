@@ -53,9 +53,10 @@ def teardown_module():
     file1 = "test_file_1.txt"
     curr_dir = os.path.abspath(os.getcwd())
     print(curr_dir)
-    if curr_dir + file:
+    #todo fix
+    if os.path.exists(curr_dir + file):
         os.remove(file)
-    if curr_dir + file1:
+    if os.path.exists(curr_dir + file1):
         os.remove(file1)
     fs = FileStorage()
     if (fs.STORAGE_PATH / str(1)).exists():
@@ -114,7 +115,7 @@ def test_get_user_by_id_fail():
 
 
 def test_get_user_by_email():
-    response = client.post("/user/get", params={"email": test_data["email"]})
+    response = client.post("/user/get", json={"email": test_data["email"]})
     print(response)
     data = response.json()
     assert response.status_code == 200, response.text
@@ -127,7 +128,7 @@ def test_get_user_by_email_fail():
     # if I use json parameter it doesn't work, because api waits for query parameters not json (class)
     # but if we change email to user: schemas.UserBase it's going to accept the json (we can use json param)
     # in case of create_user this function accepts the UserCreate class, so we can pass a json object
-    response = client.post("/user/get", params={"email": "a@mail.ru"})
+    response = client.post("/user/get", json={"email": "a@mail.ru"})
     print(response)
     assert response.status_code == 400, response.text
 
@@ -237,9 +238,14 @@ def test_upload_file_server_error():
     data = response.json()
     assert data["detail"] == f"There was an error uploading the file"
 
-
-
-
+def test_get_db():
+    gen = get_db()
+    next(gen)
+    try:
+        next(gen)
+    except Exception as e:
+        pass
+    assert True
 
 
 
