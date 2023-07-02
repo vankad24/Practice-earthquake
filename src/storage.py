@@ -3,18 +3,21 @@ from pathlib import Path
 import os
 import secrets
 import shutil
-
 from fastapi import UploadFile
 from loguru import logger
+
 
 class ProcessingDirExists(Exception):
     pass
 
+
 class StorageRootContainsFile(Exception):
     pass
 
+
 class ProcessingDirLengthError(Exception):
     pass
+
 
 class FileStorage:
     __instance = None
@@ -33,11 +36,10 @@ class FileStorage:
             return True
         return False
 
-
     def create_user_folder(self, uid: int):
         pth = self.STORAGE_PATH / str(uid)
         os.makedirs(pth)
-        logger.info(f"from storage {pth}")
+        logger.info(f"Create folder with path {pth} for user_id = {uid}")
 
     # В разработке)))
     # def validate_storage(self):
@@ -49,6 +51,7 @@ class FileStorage:
     #             raise ProcessingDirLengthError()
 
     def clear_storage(self):
+        logger.info("Clear storage")
         deleted_tokens = []
         for file in os.listdir(self.STORAGE_PATH):
             pth = self.STORAGE_PATH / file
@@ -58,11 +61,13 @@ class FileStorage:
         return deleted_tokens
 
     async def save_uploaded_file(self, user_id, file: UploadFile):
+        logger.info(f"Save file to the user folder = {self.STORAGE_PATH / str(user_id)} for user_id = {user_id}")
         contents = await file.read()
         with open(self.STORAGE_PATH / str(user_id) / file.filename, 'wb') as f:
             f.write(contents)
         await file.close()
 
     def delete_user_folder(self, user_id):
+        logger.info(f"Delete user folder for user_id = {user_id}")
         pth = self.STORAGE_PATH / str(user_id)
         shutil.rmtree(pth)

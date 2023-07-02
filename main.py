@@ -18,35 +18,46 @@ storage: FileStorage = FileStorage()
 
 # Dependency
 def get_db():
+    logger.info("Creating database connection")
     db = SessionLocal()
     try:
         yield db
     finally:
+        logger.info("Closing database connection")
         db.close()
 
 
 @app.post("/user/create", response_model=schemas.User)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+    logger.info(f"Create new user with email = {user.email}")
     db_user = crud.get_user_by_email(db, email=user.email)
-    logger.info(f"create with mail {user.email}")
+    logger.info(f"Check if user with email {user.email} exists")
     if db_user:
+        logger.error(f"Email {user.email} already registered")
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
     created_user = crud.create_user(db=db, user=user)
     storage.create_user_folder(created_user.id)
+    logger.info("Send created user data")
     return created_user
 
 
 @app.get("/users/", response_model=list[schemas.User])
 def get_users_list(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    logger.info(f"Access users list with limit = {limit}")
     users = crud.get_users(db, skip=skip, limit=limit)
+    logger.info("Send users list")
     return users
 
 
 @app.get("/user/{user_id}", response_model=schemas.User)
 def get_user_by_id(user_id: int, db: Session = Depends(get_db)):
+    logger.info(f"Get user by id = {user_id}")
     db_user = crud.get_user_by_id(db, user_id=user_id)
+    logger.info(f"Check if user with id = {user_id} exists")
     if db_user is None:
+        logger.error(f"User with id {user_id} not found")
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User not found")
+    logger.info("Send user data")
     return db_user
 
 
@@ -56,9 +67,13 @@ async def get_user_by_email(user: schemas.UserBase, db: Session = Depends(get_db
         Я заменил email на user (UserBase) и тест заработал
         https://stackoverflow.com/questions/59929028/python-fastapi-error-422-with-post-request-when-sending-json-data
     """
+    logger.info(f"Get user by email = {user.email}")
     db_user = crud.get_user_by_email(db, email=user.email)
+    logger.info(f"Check if user with email {user.email} exists")
     if db_user is None:
+        logger.error(f"User with email {user.email} not found")
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User not found")
+    logger.info("Send user data")
     return db_user
 
 
@@ -73,12 +88,17 @@ async def get_user_by_email(user: schemas.UserBase, db: Session = Depends(get_db
 @app.post("/user/{user_id}/file/upload")
 async def upload_file(user_id: int, data_start_date: str, data_end_date: str, file: UploadFile,
                       db: Session = Depends(get_db)):
+    logger.info(f"Upload file = '{file.filename}' for user_id = {user_id}")
     db_user = crud.get_user_by_id(db, user_id)
+    logger.info(f"Check if user with id = {user_id} exists")
     if db_user is None:
+        logger.error(f"User with id {user_id} not found")
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail=f"User with id '{user_id}' not found")
     db_file = crud.get_file(db, user_id, file.filename)
+    logger.info(f"Check if file '{file.filename}' was uploaded")
     if db_file is not None:
+        logger.error(f"File '{file.filename}' already uploaded")
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail=f"File '{file.filename}' already uploaded")
 
@@ -86,9 +106,10 @@ async def upload_file(user_id: int, data_start_date: str, data_end_date: str, fi
     try:
         await storage.save_uploaded_file(user_id, file)
     except Exception as e:
+        logger.exception(f"Something went wrong saving the file to the user folder with user_id = {user_id}")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                             detail=f"There was an error uploading the file")
-
+    logger.info("Send info that file was uploaded successfully")
     return {"message": f"The file '{file.filename}' was uploaded"}
 
 
@@ -100,16 +121,24 @@ async def upload_file(user_id: int, data_start_date: str, data_end_date: str, fi
 @app.post("/user/{user_id}/files", response_model=list[schemas.File])
 async def get_user_files_list(user_id: int, from_date, to_date, limit, db: Session = Depends(get_db)):
     """ from_date and to_date accepts only the following format: yyyy-mm-dd hh:mm:ss (ex. 2020-12-01 12:39:48) """
+    logger.info(f"Get user (user_id = {user_id}) files list")
     user = crud.get_user_by_id(db, user_id)
+    logger.info(f"Check if the user with id = {user_id} exists")
     if user is None:
+        logger.error(f"The user with id {user_id} not found")
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User doesn't exist")
-    return crud.get_user_files_list(db, user_id, from_date, to_date, limit)
+    files = crud.get_user_files_list(db, user_id, from_date, to_date, limit)
+    logger.info(f"Send files list to the user with user_id = {user_id}")
+    return files
 
 
 @app.get("/user/{user_id}/generate", response_class=FileResponse)
 def generate_images_from_file(user_id: int, file_name: str, db: Session = Depends(get_db)):
+    logger.info(f"Generate images from file for user_id = {user_id} and file name = {file_name}")
     db_file = crud.get_file(db, user_id, file_name)
+    logger.info(f"Check if file '{file_name}' exists")
     if db_file is None:
+        logger.error(f"File '{file_name}' was not found")
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="File not found")
 
     if not db_file.image_generated:
@@ -121,6 +150,7 @@ def generate_images_from_file(user_id: int, file_name: str, db: Session = Depend
 
 
 if __name__ == "__main__":
+    logger.info("Starting the web server")
     uvicorn.run("main:app", host="0.0.0.0", port=8000)  # , reload=True)
     # uvicorn.run("main:app", host="0.0.0.0", port=8000)
     # http://127.0.0.1:8000/docs

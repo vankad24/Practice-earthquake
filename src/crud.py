@@ -4,19 +4,24 @@ from . import models, schemas
 from datetime import datetime
 from loguru import logger
 
+
 def get_user_by_id(db: Session, user_id: int):
+    logger.info(f"Get user by id = {user_id} from the database")
     return db.query(models.User).filter(models.User.id == user_id).first()
 
 
 def get_user_by_email(db: Session, email: str):
+    logger.info(f"Get user by email {email} from the database")
     return db.query(models.User).filter(models.User.email == email).first()
 
 
 def get_users(db: Session, skip: int = 0, limit: int = 100):
+    logger.info(f"Retrieve users list with limit = {limit} from the database")
     return db.query(models.User).offset(skip).limit(limit).all()
 
+
 def create_user(db: Session, user: schemas.UserCreate):
-    logger.info(f"from crud {user.email}")
+    logger.info(f"Add new user with email {user.email} to the database")
     fake_hashed_password = user.password + "notreallyhashed"
     db_user = models.User(email=user.email, hashed_password=fake_hashed_password)
     db.add(db_user)
@@ -26,14 +31,15 @@ def create_user(db: Session, user: schemas.UserCreate):
 
 
 def get_user_files_list(db: Session, user_id: int, from_date: str, to_date: str, limit: int = 100):
-    return db.query(models.File).filter(models.File.author_id == user_id)\
-                                .filter(models.File.upload_date.between(from_date, to_date))\
-                                .order_by(models.File.upload_date.desc())\
-                                .limit(limit).all()
+    logger.info(f"Get files list for user with user_id = {user_id} from the database")
+    return db.query(models.File).filter(models.File.author_id == user_id) \
+        .filter(models.File.upload_date.between(from_date, to_date)) \
+        .order_by(models.File.upload_date.desc()) \
+        .limit(limit).all()
 
 
 def save_user_file(db: Session, user_id, file: UploadFile, data_start_date, data_end_date):
-
+    logger.info(f"Save uploaded file info to the database for user_id = {user_id}")
     file1 = models.File()
     file1.author_id = user_id
     file1.file_name = file.filename
@@ -49,7 +55,8 @@ def save_user_file(db: Session, user_id, file: UploadFile, data_start_date, data
 
 
 def get_file(db, user_id, file_name):
-    file1 = db.query(models.File).filter(models.File.author_id == user_id)\
-                                 .filter(models.File.file_name == file_name)\
-                                 .first()
+    logger.info(f"Get uploaded file where user_id = {user_id} and file name = '{file_name}' from the database")
+    file1 = db.query(models.File).filter(models.File.author_id == user_id) \
+        .filter(models.File.file_name == file_name) \
+        .first()
     return file1
