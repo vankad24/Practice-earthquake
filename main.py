@@ -7,6 +7,7 @@ from src import crud, models, schemas
 from src.storage import FileStorage
 from src.database import SessionLocal, engine
 import uvicorn
+from src.logger import logger
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -27,6 +28,7 @@ def get_db():
 @app.post("/user/create", response_model=schemas.User)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db_user = crud.get_user_by_email(db, email=user.email)
+    logger.info(f"create with mail {user.email}")
     if db_user:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
     created_user = crud.create_user(db=db, user=user)

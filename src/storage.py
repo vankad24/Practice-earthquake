@@ -5,7 +5,7 @@ import secrets
 import shutil
 
 from fastapi import UploadFile
-
+from loguru import logger
 
 class ProcessingDirExists(Exception):
     pass
@@ -33,9 +33,11 @@ class FileStorage:
             return True
         return False
 
+
     def create_user_folder(self, uid: int):
         pth = self.STORAGE_PATH / str(uid)
         os.makedirs(pth)
+        logger.info(f"from storage {pth}")
 
     # В разработке)))
     # def validate_storage(self):

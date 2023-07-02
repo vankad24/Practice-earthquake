@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from fastapi import UploadFile
 from . import models, schemas
 from datetime import datetime
-
+from loguru import logger
 
 def get_user_by_id(db: Session, user_id: int):
     return db.query(models.User).filter(models.User.id == user_id).first()
@@ -15,8 +15,8 @@ def get_user_by_email(db: Session, email: str):
 def get_users(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.User).offset(skip).limit(limit).all()
 
-
 def create_user(db: Session, user: schemas.UserCreate):
+    logger.info(f"from crud {user.email}")
     fake_hashed_password = user.password + "notreallyhashed"
     db_user = models.User(email=user.email, hashed_password=fake_hashed_password)
     db.add(db_user)
