@@ -18,3 +18,6 @@ poetry install
 #### Run the application:
 python main.py
 
+#### Run tests:
+pytest
+
