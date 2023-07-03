@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "practice-earthquake"
+version = "0.1.0"
+description = "\"fastapi server\""
+authors = ["Sergei <monyaksergey@mail.ru>"]
+license = "\"MIT\""
+readme = "README.md"
+packages = [{include = "practice_earthquake"}]
+
+[tool.poetry.dependencies]
+python = ">=3.10"
+sqlalchemy = "^2.0.17"
+fastapi = "0.97.0"
+pydantic = {version = "1.10.9", extras = ["email"]}
+loguru = "0.7.0"
+uvicorn = "0.22.0"
+python-multipart = "0.0.6"
+pytest = "7.3.2"
+httpx = "0.24.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
