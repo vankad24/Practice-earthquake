@@ -177,7 +177,6 @@ pyrightconfig.json
 
 
 .idea
-*.toml
 *.lock
 app
 *.db
