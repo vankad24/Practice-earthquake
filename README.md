@@ -2,19 +2,19 @@
 Authors: Vanya, Sergei
 
 ### Installation:
-####Activate conda environment:
+#### Activate conda environment:
 conda deactivate
 conda create -n your_env_name python=3.10
 conda activate your_env_name
 
-####install poetry:
+#### Install poetry inside your environment:
 pip install poetry
 
-####navigate to the directory containing the project
+#### Navigate to the directory containing the project
 
-####install dependencies:
+#### Install dependencies:
 poetry install
 
-####run application:
+#### Run the application:
 python main.py
 
