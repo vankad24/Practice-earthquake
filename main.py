@@ -169,7 +169,7 @@ def generate_distance_time(user_id: int, params: GenerateDistanceParams, map_typ
         logger.error(f"File '{name}' was not found")
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="File not found")
 
-    hashed_name = str(name)
+    hashed_name = str(hash(name))
     db_gen_file = crud.get_generated_file(db, user_id, hashed_name)
     folder_path = str(storage.get_user_folder_path(user_id))
     path = str(storage.get_user_folder_path(user_id)/hashed_name)+".png"
