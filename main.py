@@ -90,8 +90,7 @@ async def get_user_by_email(user: schemas.UserBase, db: Session = Depends(get_db
 
 
 @app.post("/user/{user_id}/file/upload")
-async def upload_file(user_id: int, data_start_date: str, data_end_date: str, file: UploadFile,
-                      db: Session = Depends(get_db)):
+async def upload_file(user_id: int, file: UploadFile, db: Session = Depends(get_db)):
     logger.info(f"Upload file = '{file.filename}' for user_id = {user_id}")
     db_user = crud.get_user_by_id(db, user_id)
     logger.info(f"Check if user with id = {user_id} exists")
@@ -106,7 +105,7 @@ async def upload_file(user_id: int, data_start_date: str, data_end_date: str, fi
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail=f"File '{file.filename}' already uploaded")
 
-    crud.save_user_file(db, user_id, file, data_start_date, data_end_date)
+    crud.save_user_file(db, user_id, file) #, data_start_date, data_end_date)
     try:
         await storage.save_uploaded_file(user_id, file)
     except Exception as e:

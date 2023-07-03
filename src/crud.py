@@ -43,8 +43,8 @@ def save_user_file(db: Session, user_id, file: UploadFile, data_start_date, data
     file1 = models.File()
     file1.author_id = user_id
     file1.file_name = file.filename
-    file1.data_start_date = datetime.strptime(data_start_date, "%Y-%m-%d %H:%M:%S")
-    file1.data_end_date = datetime.strptime(data_end_date, "%Y-%m-%d %H:%M:%S")
+    # file1.data_start_date = datetime.strptime(data_start_date, "%Y-%m-%d %H:%M:%S")
+    # file1.data_end_date = datetime.strptime(data_end_date, "%Y-%m-%d %H:%M:%S")
     file1.upload_date = datetime.now().replace(microsecond=0)
 
     db.add(file1)

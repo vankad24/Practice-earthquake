@@ -26,8 +26,8 @@ class File(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     file_name = Column(String)
-    data_start_date = Column(dt)
-    data_end_date = Column(dt)
+    # data_start_date = Column(dt)
+    # data_end_date = Column(dt)
     upload_date = Column(dt)
     author_id = Column(Integer, ForeignKey("users.id"))
 

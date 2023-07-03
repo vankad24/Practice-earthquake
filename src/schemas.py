@@ -12,8 +12,8 @@ class FileCreate(FileBase):
 
 class File(FileBase):
     id: int
-    data_start_date: datetime
-    data_end_date: datetime
+    # data_start_date: datetime
+    # data_end_date: datetime
     upload_date: datetime
     author_id: int
 
