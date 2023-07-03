@@ -38,7 +38,7 @@ def get_user_files_list(db: Session, user_id: int, from_date: str, to_date: str,
         .limit(limit).all()
 
 
-def save_user_file(db: Session, user_id, file: UploadFile, data_start_date, data_end_date):
+def save_user_file(db: Session, user_id, file: UploadFile):
     logger.info(f"Save uploaded file info to the database for user_id = {user_id}")
     file1 = models.File()
     file1.author_id = user_id
@@ -63,7 +63,7 @@ def get_file(db, user_id, file_name):
 
 def get_generated_file(db, user_id, file_name):
     logger.info(f"Get generated file for user with user_id = {user_id} from the database")
-    db.query(models.GenFile).filter(models.GenFile.author_id == user_id)\
+    return db.query(models.GenFile).filter(models.GenFile.author_id == user_id)\
         .filter(models.GenFile.file_name == file_name).first()
 
 def save_generated_file(db, user_id, file_name):

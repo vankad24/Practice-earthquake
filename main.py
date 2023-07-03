@@ -175,7 +175,7 @@ def generate_distance_time(user_id: int, params: GenerateDistanceParams, map_typ
     if not db_gen_file:
         file = folder_path+"/"+name
         ionoplot.plot_distance_time(file, map_type, params.epicenter.dict(), save_path=path)
-        crud.save_generated_file(db,user_id, path)
+        crud.save_generated_file(db,user_id, hashed_name)
 
     return path
 
