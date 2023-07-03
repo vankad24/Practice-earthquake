@@ -1,13 +1,17 @@
+from datetime import datetime
+
 from fastapi import Depends, FastAPI, HTTPException, UploadFile, status
 from fastapi.responses import FileResponse
 from pydantic import EmailStr
 from sqlalchemy.orm import Session
 
 from src import crud, models, schemas
+from src.schemas import Epicenter, GenerateParams, GenerateDistanceParams
 from src.storage import FileStorage
 from src.database import SessionLocal, engine
 import uvicorn
 from src.logger import logger
+import ionoplot
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -132,21 +136,49 @@ async def get_user_files_list(user_id: int, from_date, to_date, limit, db: Sessi
     return files
 
 
-@app.get("/user/{user_id}/generate", response_class=FileResponse)
-def generate_images_from_file(user_id: int, file_name: str, db: Session = Depends(get_db)):
-    logger.info(f"Generate images from file for user_id = {user_id} and file name = {file_name}")
-    db_file = crud.get_file(db, user_id, file_name)
-    logger.info(f"Check if file '{file_name}' exists")
+@app.post("/user/{user_id}/generate/map", response_class=FileResponse)
+def generate_map(user_id: int, params: GenerateParams, map_type: ionoplot.MapType,
+                 db: Session = Depends(get_db)):
+    logger.info(f"Generate images from file for user_id = {user_id} and files = {params.file_names}")
+    logger.info(f"Check if files '{params.file_names}' exist")
+    for name in params.file_names:
+        db_file = crud.get_file(db, user_id, name)
+        if db_file is None:
+            logger.error(f"File '{name}' was not found")
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="File not found")
+
+    hashed_name = str(hash("".join(params.file_names)))
+    db_gen_file = crud.get_generated_file(db, user_id, hashed_name)
+    folder_path = str(storage.get_user_folder_path(user_id))
+    path = str(storage.get_user_folder_path(user_id)/hashed_name)+".png"
+    if not db_gen_file:
+        files = list(map(lambda x: folder_path+"/"+x,params.file_names))
+        ionoplot.plot_maps(files, map_type, params.times, params.epicenter.dict(), save_path=path)
+        crud.save_generated_file(db,user_id,hashed_name)
+
+    return path
+
+@app.post("/user/{user_id}/generate/distance_time", response_class=FileResponse)
+def generate_distance_time(user_id: int, params: GenerateDistanceParams, map_type: ionoplot.MapType,
+                 db: Session = Depends(get_db)):
+    logger.info(f"Generate distance_time from file for user_id = {user_id} and files = {params.file_name}")
+    name = params.file_name
+    logger.info(f"Check if files '{name}' exist")
+    db_file = crud.get_file(db, user_id, name)
     if db_file is None:
-        logger.error(f"File '{file_name}' was not found")
+        logger.error(f"File '{name}' was not found")
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="File not found")
 
-    if not db_file.image_generated:
-        pass
-        # generate_images()
-        # storage.save_images()
+    hashed_name = str(name)
+    db_gen_file = crud.get_generated_file(db, user_id, hashed_name)
+    folder_path = str(storage.get_user_folder_path(user_id))
+    path = str(storage.get_user_folder_path(user_id)/hashed_name)+".png"
+    if not db_gen_file:
+        file = folder_path+"/"+name
+        ionoplot.plot_distance_time(file, map_type, params.epicenter.dict(), save_path=path)
+        crud.save_generated_file(db,user_id, path)
 
-    return "path/to/images"
+    return path
 
 
 if __name__ == "__main__":
