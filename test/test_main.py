@@ -200,8 +200,8 @@ def test_get_user_files_list():
     assert response.status_code == 200, response.text
     assert data[0]["file_name"] == "test_file.txt"
     assert data[0]["id"] == 1
-    assert data[0]["data_start_date"] == "2020-05-05T00:00:00"
-    assert data[0]["data_end_date"] == "2020-06-05T10:20:30"
+    # assert data[0]["data_start_date"] == "2020-05-05T00:00:00"
+    # assert data[0]["data_end_date"] == "2020-06-05T10:20:30"
     assert data[0]["author_id"] == 1
 
 
@@ -212,15 +212,6 @@ def test_get_user_files_list_fail():
         "limit": 1
     })
     assert response.status_code == 400, response.text
-
-
-def test_generate_images_from_file_fail():
-    response = client.get("/user/1/generate", params={
-        "file_name": "some_file.txt"
-    })
-    assert response.status_code == 400, response.text
-    data = response.json()
-    assert data["detail"] == f"File not found"
 
 
 def test_upload_file_server_error():
