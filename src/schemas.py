@@ -35,3 +35,18 @@ class User(UserBase):
 
     class Config:
         orm_mode = True
+
+class Epicenter(BaseModel):
+    lat: float
+    lon: float
+    time: datetime
+
+class Params(BaseModel):
+    epicenter: Epicenter
+
+class GenerateParams(Params):
+    file_names: list[str]
+    times: list[datetime]
+
+class GenerateDistanceParams(Params):
+    file_name: str

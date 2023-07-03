@@ -41,6 +41,9 @@ class FileStorage:
         os.makedirs(pth)
         logger.info(f"Create folder with path {pth} for user_id = {uid}")
 
+    def get_user_folder_path(self, uid: int):
+        return self.STORAGE_PATH / str(uid)
+
     # В разработке)))
     # def validate_storage(self):
     #     for file in os.listdir(self.STORAGE_PATH):

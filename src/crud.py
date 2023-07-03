@@ -60,3 +60,20 @@ def get_file(db, user_id, file_name):
         .filter(models.File.file_name == file_name) \
         .first()
     return file1
+
+def get_generated_file(db, user_id, file_name):
+    logger.info(f"Get generated file for user with user_id = {user_id} from the database")
+    db.query(models.GenFile).filter(models.GenFile.author_id == user_id)\
+        .filter(models.GenFile.file_name == file_name).first()
+
+def save_generated_file(db, user_id, file_name):
+    logger.info(f"Save generated file '{file_name}' to the database for user_id = {user_id}")
+    file1 = models.GenFile()
+    file1.author_id = user_id
+    file1.file_name = file_name
+
+    db.add(file1)
+    db.commit()
+    db.refresh(file1)
+
+    return file1

@@ -34,3 +34,12 @@ class File(Base):
     user = relationship("User", back_populates="files")
 
 # read about relationship, class Config in schemas
+
+class GenFile(Base):
+    __tablename__ = "gen_files"
+
+    id = Column(Integer, primary_key=True, index=True)
+    file_name = Column(String)
+    author_id = Column(Integer, ForeignKey("users.id"))
+
+
